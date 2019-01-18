@@ -2,3 +2,4 @@
 SessionFileSystem/
 __pycache__/
 privateInfo.py
+Entity.py

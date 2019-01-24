@@ -2,14 +2,11 @@ sessionInformation = ['hotel','hotelname','date','time','number','location',"res
 
 def initsession(sessiondict):
     
-    sessiondict = dict()
-
     sessiondict['context'] = "None"
 
     for item in sessionInformation:
         sessiondict[item] = ""
 
     sessiondict['location'] = list()
-    # print(str(sessiondict))
 
     return sessiondict

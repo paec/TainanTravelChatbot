@@ -14,8 +14,8 @@ def getTimetable(ssn,asn,date,time):
   # four input : 起點, 終點, 日期, 時間
   startStationName = ssn
   arriveStationName = asn
-  date = "2019-12-25"
-  time = "1500"
+  date = date
+  time = "0000"
 
 
   #find station code
@@ -48,6 +48,7 @@ def getTimetable(ssn,asn,date,time):
 
     timetable = soup.find_all("script")[11].text.replace(";","").replace("var JSONData=","")
 
+    print(timetable)
     timetable = json.loads(timetable)
 
     # temp = re.split(":|,", a)
@@ -68,15 +69,19 @@ def getTimetable(ssn,asn,date,time):
   #   print("車次: ", temp[1], "出發時間: ", temp[31], "抵達時間: ", temp[33])
   #   print("車次: ", temp[54], "出發時間: ",  temp[84], "抵達時間: ", temp[86])
   #   print("車次: ", temp[106], "出發時間: ",  temp[136], "抵達時間: ", temp[138])
-
+    return timetable
     
 
   except Exception as e:
+
+    return "notrain"
     print(e)
 
-  return timetable
+  
 
 
 if __name__ == '__main__':
 
-  getTimetable("台南","板橋","","")
+  a = getTimetable("台南","沙崙","2019-1-22","0000")
+  print(a)
+  print(a)

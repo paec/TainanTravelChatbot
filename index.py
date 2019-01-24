@@ -12,11 +12,14 @@ from Intent import getResponse
 from jieba_seg import jieba_seg
 import session_init
 
+
 app = Flask(__name__)
+
 
 app.config['SESSION_TYPE'] = 'filesystem'  # session類型為redis
 app.config['SESSION_FILE_DIR'] = './/SessionFileSystem'  # session類型為redis
-    
+app.config['SECRET_KEY'] = 'wmmks'
+
 app.config['SESSION_FILE_THRESHOLD'] = 500  # 存儲session的個數如果大於這個值時，就要開始進行刪除了
 app.config['SESSION_FILE_MODE'] = 384  # 文檔權限類型
 
@@ -26,7 +29,6 @@ app.config['SESSION_KEY_PREFIX'] = 'session:'  # 保存到session中的值的前
 
 Session(app)
 
-session = dict()
 
 
 @app.route('/')
@@ -34,12 +36,11 @@ session = dict()
 def hello():
 
     global session
-    
 
     session = session_init.initsession(session)
 
-    print(session)
-    
+    print(session)    
+
     return render_template('index.html')
 
 

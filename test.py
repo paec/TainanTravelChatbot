@@ -1,23 +1,28 @@
 import os 
 from fuzzywuzzy import fuzz
 import privateInfo
-# with open("jieba\\"+"hotelname.txt","r",encoding="utf8") as r:
 
-#             hotelname = ""
+# with open("jieba\\"+"restaurantname.txt","r",encoding="utf8") as r:
+
+#             restaurantname = ""
 #             maxscore = 0 
 
-#             hotellist = r.read().splitlines()
+#             restaurantlist = r.read().splitlines()
             
-#             score = fuzz.ratio("台南菁英酒店", "我要預訂的飯店是菁英")
+#             for r in restaurantlist:
 
+#                 score = fuzz.ratio("牛肉湯", r)
 
-#             print(hotelname)        
-#             print(score)
+#                 if score>0:
+
+#                     print(r)        
+#                     print(score)
 
     
 
-print(privateInfo.mysqlaccount.ip)
+result = "123".find("13")
 
+print(result)
 
 # with open("jieba\\"+"wrtie.txt","r+") as w:
 

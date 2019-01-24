@@ -7,6 +7,8 @@ import acessmysql
 import pymysql
 from fuzzywuzzy import fuzz
 import privateInfo
+from CN2Num import _trans
+import railway
 
 nothasfollowupIntent = ["Welcome","NotDefined"]
 endingIntent = ["Roomnumconfirmed","CallingConfirmed","Getrestaurantinfo","TrainConfirmed"]
@@ -67,7 +69,7 @@ def getIntent(inputlist):
             Intent= "Welcome"  #沒參數也帶一個空字串，避免tuple變str
 
 
-        if all(entity in matchingEntity for entity in ["booking","hotel"]):             #Bookinghotel
+        if any(entity in matchingEntity for entity in ["hotel"]):             #Bookinghotel
 
             Intent = "Bookinghotel"
             Session["hotel"] = matchingEntity["hotel"]
@@ -90,7 +92,7 @@ def getIntent(inputlist):
 
             Intent = "EatingService"
 
-        if all(entity in matchingEntity for entity in["booking","train"]):
+        if any(entity in matchingEntity for entity in["train"]):
 
             Intent = "Bookingtrain"
 
@@ -146,12 +148,16 @@ def getIntent(inputlist):
 
     elif Session['context'] == "truehotel":
 
-        result = RE.date_pattern.findall(originString)
+        match = RE.date_pattern.search(originString)
 
-        if len(result) > 0:
+        if match:
 
+            result = "2019-"+match.group(1)+"-"+match.group(2)
+
+            Session["date"] = result
+            
             Intent = "Dateconfirmed"
-            Session["date"] = result[0]
+     
 
         else:
 
@@ -165,7 +171,7 @@ def getIntent(inputlist):
         if len(result) > 0:
 
             Intent = "Roomnumconfirmed"
-            Session["number"] = result[0]
+            Session["number"] = _trans(result[0])
 
         else:
 
@@ -213,7 +219,7 @@ def getIntent(inputlist):
         if len(result) > 0:
 
             Intent = "CallingConfirmed"
-            Session["number"] = result[0]
+            Session["number"] = _trans(result[0])
 
         else:
 
@@ -239,7 +245,7 @@ def getIntent(inputlist):
         print("maxscore: ",maxscore)
 
         if maxscore >= 50:
-
+            
             Intent = "Getrestaurantinfo"
             Session["restaurantname"] = restaurantname
 
@@ -248,10 +254,30 @@ def getIntent(inputlist):
             result = cursor.fetchone()
 
             Session["restaurantinfo"] = result
-       
+
         else:
 
-            Intent = "NotDefined"
+            with open(".//jieba//restaurantname.txt","r",encoding="utf8") as r:
+
+                restaurantlist = r.read().splitlines()
+
+            mathcinglist = []
+
+            for restaurant in restaurantlist:
+
+                if restaurant.find(originString) != -1 :
+
+                    mathcinglist.append(restaurant)
+
+
+            if len(mathcinglist) > 0 :
+
+                Intent = "Getrestaurantlist"
+                print(restaurantlist)
+
+            else:
+
+                Intent = "NotDefined"
 
 
 #--------------------------------訂車票------------------------------------------------
@@ -263,6 +289,7 @@ def getIntent(inputlist):
             data = acessmysql.querydb("SELECT name FROM `BookingChatbot_TWRailwayStation` WHERE name ='"+word.lower()+"'",conn,cursor)
 
             print(data)
+
             if len(data)>0:
 
                 entity = "location"
@@ -288,13 +315,23 @@ def getIntent(inputlist):
 
     elif Session['context'] == "Confirmdate" :
 
-        result = RE.date_pattern.findall(originString)
+        match = RE.date_pattern.search(originString)
 
-        if len(result) > 0:
+        if match:
 
-            Intent = "Confirmtrain"
+            result = "2019-"+match.group(1)+"-"+match.group(2)
 
-            Session["date"] = result[0]
+            Session["date"] = result
+
+            timetable = railway.getTimetable(Session['location'][0],Session['location'][1],Session["date"],Session["time"])
+
+            if timetable == "notrain":
+
+                Intent = "Bookingtrain"
+
+            else:
+                Session["queryResult"] = timetable
+                Intent = "Confirmtrain"
 
         else:
 
@@ -307,7 +344,7 @@ def getIntent(inputlist):
 
         if len(result) > 0:
 
-            Session["number"] = result[0]
+            Session["number"] = _trans(result[0])
 
             Intent = "TrainConfirmed"
 
@@ -358,7 +395,7 @@ def getResponse(input,session):
 
 
     print("context after: "+str(Session['context'])+"\n")
-    print("Session content: "+str(Session))
+    # print("Session content: "+str(Session))
 
     AjaxResponse = {"botresponse": botresponse , "session": Session}
 

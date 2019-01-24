@@ -2,6 +2,7 @@ from io import StringIO
 import pymysql
 import railway
 import privateInfo
+import json
 
 endingIntent = ["Roomnumconfirmed","CallingConfirmed","Getrestaurantinfo","TrainConfirmed"]
 
@@ -72,6 +73,8 @@ def getResponseText(Intent,session):
 
     "Getrestaurantinfo" : ['好的以下是'+session["restaurantname"]+"的詳細聯絡資訊。@@@"] ,
 
+    "Getrestaurantlist" : ['restaurantlist'],
+
     "Bookingtrain" : ['好的，請問您要從哪裡到哪裡呢? 請告訴我"起點車站"和"到達車站"。'] ,
 
     "NotDefined" : ['']
@@ -90,12 +93,14 @@ def getResponseText(Intent,session):
 
         result = session['queryResult']
 
+        reponsetext.Append("為您推薦幾家網路評分較高的餐廳<p><p>")
+
         for i in range(10) :
 
             print("店名: "+result[i]['name']+"(網路評分: "+result[i]['rating']+")")
             reponsetext.Append("店名: "+result[i]['name']+"(網路評分: "+result[i]['rating']+") <p><p>")
 
-        reponsetext.Append("@@@請問需要為您提供哪間店的聯絡資訊嗎? 請告訴我店名。")
+        reponsetext.Append("@@@請問需要為您提供哪間店的聯絡資訊嗎?&nbsp;或是您有其他想去的店嗎? 請告訴我店名。")
 
 
     elif intent == 'Getrestaurantinfo':
@@ -104,11 +109,11 @@ def getResponseText(Intent,session):
 
     elif intent == "Confirmtrain" :
 
-        timetable = railway.getTimetable(loc1,loc2,session["date"],session["time"])
-
+        timetable = session['queryResult']
 
         reponsetext.Append("車次&nbsp;&nbsp;&nbsp;出發時間&nbsp;&nbsp;&nbsp;到達時間<p><p>")
 
+        # print(timetable)
         for row in timetable:
 
             reponsetext.Append(row['Train_Code']+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+row['From_Departure_Time']+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+row['To_Arrival_Time']+"<p><p>")
@@ -117,69 +122,75 @@ def getResponseText(Intent,session):
 
 ##########################################################################################################
 
+    if intent == "Bookingtrain" and session['context'] == 'Confirmdate':
 
+        reponsetext = StringBuilder()
+        reponsetext.Append("無指定的班次，請重新輸入條件@@@")
+        reponsetext.Append('請問您要從哪裡到哪裡呢? 請告訴我"起點車站"和"到達車站"。')
 
-    if intent == "NotDefined" and session['context'] == 'None':
+    elif intent == "NotDefined":
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，或本系統未提供此服務，你重新說明您的需求。")
-        reponsetext.Append("@@@")
-        reponsetext.Append("本系統目前提供 叫車 、訂車票 、訂飯店和預定(查詢)餐廳 的服務。")
-        reponsetext.Append("@@@")
-        reponsetext.Append("請問需要什麼服務呢??")
-    
+        if session['context'] == 'None':
 
-    elif intent == "NotDefined" and session['context'] == "Bookinghotel":
-        reponsetext.Append("不好意思，我不瞭解您的意思，或查詢不到您所要的"+session['hotel'])
-        reponsetext.Append("@@@")
-        reponsetext.Append("再次跟您確認，您所要預訂的"+session['hotel']+"名稱是?")
+            reponsetext.Append("不好意思，我不瞭解您的意思，或本系統未提供此服務，你重新說明您的需求。")
+            reponsetext.Append("@@@")
+            reponsetext.Append("本系統目前提供 叫車 、訂車票 、訂飯店和預定(查詢)餐廳 的服務。")
+            reponsetext.Append("@@@")
+            reponsetext.Append("請問需要什麼服務呢??")
+        
 
-    elif intent == "NotDefined" and session['context'] == "Confirmhotel":
+        elif session['context'] == "Bookinghotel":
+            reponsetext.Append("不好意思，我不瞭解您的意思，或查詢不到您所要的"+session['hotel'])
+            reponsetext.Append("@@@")
+            reponsetext.Append("再次跟您確認，您所要預訂的"+session['hotel']+"名稱是?")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思")
-        reponsetext.Append("@@@")
-        reponsetext.Append("您要預訂的是\""+session['hotelname']+"\"嗎?")
+        elif session['context'] == "Confirmhotel":
 
-    elif intent == "NotDefined" and session['context'] == "truehotel":
+            reponsetext.Append("不好意思，我不瞭解您的意思")
+            reponsetext.Append("@@@")
+            reponsetext.Append("您要預訂的是\""+session['hotelname']+"\"嗎?")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思")
-        reponsetext.Append("@@@")
-        reponsetext.Append("請問預計的入住日期是?")
+        elif session['context'] == "truehotel":
 
-    elif intent == "NotDefined" and session['context'] == "Dateconfirmed":
+            reponsetext.Append("不好意思，我不瞭解您的意思")
+            reponsetext.Append("@@@")
+            reponsetext.Append("請問預計的入住日期是?")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的數字")
-        reponsetext.Append("@@@")
-        reponsetext.Append("請問您要預訂幾間房間?")
+        elif session['context'] == "Dateconfirmed":
 
-    elif intent == "NotDefined" and session['context'] == "CallingCar":
+            reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的數字")
+            reponsetext.Append("@@@")
+            reponsetext.Append("請問您要預訂幾間房間?")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，或無法判斷您所輸入的起點或目的地")
-        reponsetext.Append("@@@")
-        reponsetext.Append('請告訴我您的"起點"(或所在位置) 與 預計到達的"終點"(目的地)。')    
+        elif session['context'] == "CallingCar":
 
-    elif intent == "NotDefined" and session['context'] == "Confirmpassenger":
+            reponsetext.Append("不好意思，我不瞭解您的意思，或無法判斷您所輸入的起點或目的地")
+            reponsetext.Append("@@@")
+            reponsetext.Append('請告訴我您的"起點"(或所在位置) 與 預計到達的"終點"(目的地)。')    
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的數字")
-        reponsetext.Append("@@@")
-        reponsetext.Append("請問共有幾位乘客呢?")
+        elif session['context'] == "Confirmpassenger":
 
-    elif intent == "NotDefined" and session['context'] == "EatingService":
+            reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的數字")
+            reponsetext.Append("@@@")
+            reponsetext.Append("請問共有幾位乘客呢?")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的店名。")
+        elif session['context'] == "EatingService":
 
-    elif intent == "NotDefined" and session['context'] == "Bookingtrain":
+            reponsetext.Append("不好意思，我不瞭解您的意思，請輸入正確的店名。")
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，或無法判斷您所輸入的站名。")    
-        reponsetext.Append("@@@")
-        reponsetext.Append('請告訴我"起點車站"和"到達車站"。')    
+        elif session['context'] == "Bookingtrain":
 
-    elif intent == "NotDefined" and session['context'] == "Confirmdate":
+            reponsetext.Append("不好意思，我不瞭解您的意思，或無法判斷您所輸入的站名。")    
+            reponsetext.Append("@@@")
+            reponsetext.Append('請告訴我"起點車站"和"到達車站"。')    
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，請您輸入正確的日期。")    
+        elif session['context'] == "Confirmdate":
 
-    elif intent == "NotDefined" and session['context'] == "Confirmtrain":
+            reponsetext.Append("不好意思，我不瞭解您的意思，請您輸入正確的日期。")    
 
-        reponsetext.Append("不好意思，我不瞭解您的意思，請您輸入正確的車次。") 
+        elif session['context'] == "Confirmtrain":
+
+            reponsetext.Append("不好意思，我不瞭解您的意思，請您輸入正確的車次。") 
 
     elif intent in endingIntent:
         

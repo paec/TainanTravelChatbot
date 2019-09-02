@@ -22,7 +22,7 @@ def getIntent(inputlist):
 
     matchingEntity = dict()
     Intent = ""
-    print("\ncontext before: "+Session['context'])
+    # print("\ncontext before: "+Session['context'])
 
 # ---------------------------判斷user input包含哪些entity----------------------------
     print("斷詞結果: "+str(inputlist))
@@ -84,7 +84,7 @@ def getIntent(inputlist):
 
             if 'queryResult' not in Session:
 
-                cursor.execute("SELECT * FROM BookingChatbot_Restaurant ORDER BY rating desc LIMIT 200")
+                cursor.execute("SELECT * FROM BookingChatbot_Restaurant ORDER BY rating desc LIMIT 50")
 
                 result = cursor.fetchall()
 

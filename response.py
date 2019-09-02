@@ -95,9 +95,9 @@ def getResponseText(Intent,session):
 
         reponsetext.Append("為您推薦幾家網路評分較高的餐廳<p><p>")
 
-        for i in range(10) :
+        for i in range(2) :
 
-            print("店名: "+result[i]['name']+"(網路評分: "+result[i]['rating']+")")
+            # print("店名: "+result[i]['name'])
             reponsetext.Append("店名: "+result[i]['name']+"(網路評分: "+result[i]['rating']+") <p><p>")
 
         reponsetext.Append("@@@請問需要為您提供哪間店的聯絡資訊嗎?&nbsp;或是您有其他想去的店嗎? 請告訴我店名。")

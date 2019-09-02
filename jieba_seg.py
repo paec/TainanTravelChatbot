@@ -20,5 +20,5 @@ def jieba_seg(text):
 
 if __name__ == '__main__':
     
-    print(jieba_seg("台南香格里拉國際大飯店"))
+    print(jieba_seg("火龍果"))
 

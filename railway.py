@@ -82,6 +82,6 @@ def getTimetable(ssn,asn,date,time):
 
 if __name__ == '__main__':
 
-  a = getTimetable("台南","沙崙","2019-1-22","0000")
+  a = getTimetable("台北","花蓮","2019-4-4","0000")
   print(a)
   print(a)

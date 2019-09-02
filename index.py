@@ -10,8 +10,8 @@ import json
 import wmmksCKIP
 from Intent import getResponse
 from jieba_seg import jieba_seg
-import session_init
-
+from session_init import initsession 
+import sys
 
 app = Flask(__name__)
 
@@ -27,8 +27,6 @@ app.config['SESSION_PERMANENT'] = False  # 如果設置為False，則關閉瀏�
 app.config['SESSION_USE_SIGNER'] = False  # 是否對發送到瀏覽器上session的cookie值進行加密
 app.config['SESSION_KEY_PREFIX'] = 'session:'  # 保存到session中的值的前綴
 
-Session(app)
-
 
 
 @app.route('/')
@@ -36,13 +34,10 @@ Session(app)
 def hello():
 
     global session
-
-    session = session_init.initsession(session)
-
-    print(session)    
+    
+    session = initsession(session)
 
     return render_template('index.html')
-
 
 
 @app.route('/inputparser',methods=['POST'])
@@ -55,10 +50,14 @@ def parse():
 
     segdata = jieba_seg(data)
 
+    print("------------------------------",session,"-----------------------------", file=sys.stderr)
+    
     response = getResponse( {'segdata':segdata , 'originData': data} , session)  #Intent.AjaxResponse
 
     session = response['session']
 
+    print(response, file=sys.stderr)
+    
     return jsonify(response['botresponse'])
 
 
